@@ -1,0 +1,133 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progress Bars</title>
+
+    <link rel="stylesheet" type="text/css" href="index.css" />
+
+    <link rel="icon" type="image/ico" href="../favicons/favicon-32.ico" sizes="32x32">
+    <link rel="icon" type="image/ico" href="../favicons/favicon-128.ico" sizes="128x128">
+    <link rel="icon" type="image/ico" href="../favicons/favicon-152.ico" sizes="152x152">
+    <link rel="icon" type="image/ico" href="../favicons/favicon-167.ico" sizes="167x167">
+    <link rel="icon" type="image/ico" href="../favicons/favicon-180.ico" sizes="180x180">
+    <link rel="icon" type="image/ico" href="../favicons/favicon-192.ico" sizes="192x192">
+    <link rel="icon" type="image/ico" href="../favicons/favicon-196.ico" sizes="196x196">
+</head>
+<body>
+    <div id="app">
+        <h1>My Progress</h1>
+        <button class="btn" v-on:click="addNewBar">+ New Progress Bar</button>
+        <button class="btn float-right" v-on:click="toggleDarkMode">Dark Mode</button>
+        <hr />
+        <bar v-for="bar in bars"
+            :key="bars.indexOf(bar)"
+            :index="bars.indexOf(bar)"
+            :name="bar.name"
+            :start-date="bar.startDate"
+            :end-date="bar.endDate"
+            :number-of-actions="bar.numberOfActions"
+            :actions-completed="bar.actionsCompleted"
+            :increment-up="bar.incrementUp"
+            :increment-down="bar.incrementDown"
+            @remove-bar="removeBar"
+            @update-bar="updateBar">
+        </bar>
+    </div>
+
+    <script type="text/x-template" id="bar-template">
+        <div>
+            <div class="row">
+                <p class="bar-name" v-if="!edit"><b>{{name}}</b></p>
+                <div class="bar-name" v-if="edit">
+                    <input placeholder="Name" type="text" v-model="newName" />
+                </div>
+                <div class="completed-behind-ahead-goal"  v-if="!edit">
+                    <b class="completed">{{actionsCompleted}}</b>
+                    <b>/</b>
+                    <b class="behind" v-if="behind">{{actionsAheadBehind}}</b>
+                    <b class="ahead" v-else>{{actionsAheadBehind}}</b>
+                    <b>/</b>
+                    <b class="goal">{{numberOfActions}}</b>
+                    <p class="number-float" :class="{ hidden: numberFloatHidden }">{{numberFloat}}</p>
+                </div>
+                <div class="completed-behind-ahead-goal" v-if="edit">
+                    <input class="completed" placeholder="Completed" type="number" min="0" v-model="newActionsCompleted" oninput="validity.valid||(value='');" />
+                    <b>/</b>
+                    <b class="behind" v-if="behind">{{actionsAheadBehind}}</b>
+                    <b class="ahead" v-else>{{actionsAheadBehind}}</b>
+                    <b>/</b>
+                    <input class="goal" placeholder="Goal" type="number" min="1" v-model="newNumberOfActions" oninput="validity.valid||(value='');" />
+                </div>
+                <button class="editBtn" v-on:click="toggleEdit">Edit</button>
+                <br>
+                <p class="per-day" v-if="actionsPerDay >= 1">Avg / day: {{actionsPerDay}}</p>
+                <p class="per-day" v-else>Days per: {{daysPerAction}}</p>
+            </div>
+            <div class="row" v-if="edit">
+                <div class="column-40">
+                    <p><b>Start Date</b></p>
+                    <input type="date" v-model="newStartDate" />
+
+                    <p><b>End Date</b></p>
+                    <input type="date" v-model="newEndDate" />
+                </div>
+                <div class="column-40">
+                    <p><b>Display Order</b></p>
+                    <input type="number" min="0" v-model="newIndex" oninput="validity.valid||(value='');" />
+
+                    <p class="warning" v-if="verify">Are you sure you want to delete this bar?</p>
+                    <br>
+                    <button class="warning margin-bottom" v-if="verify" v-on:click="remove">Delete</button>
+                    <button class="margin-bottom" v-if="verify" v-on:click="toggleVerify">Cancel</button>
+                    <button class="warning margin" v-else v-on:click="toggleVerify">Delete Progress Bar</button>
+                    
+                    <br>
+                    <p class="warning" v-if="dateDiff < 1">Input start and end date (start date must be before end date)</p>
+                    <p class="warning" v-if="numberOfActions < 1">Input number of actions to complete (must be more than 0)</p>
+                    <p class="warning" v-if="incrementUp < 1 || incrementDown < 1">Input number to increment by (must be more than 0)</p>
+                    <button v-on:click="update">Update Progress Bar</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="progressBar">
+                    <div class="overlapProgress progress" :class="{ bumpUp: tooSmallBlue }" ref="blue" v-if="overlapPercent != '0%'" :style="{width: overlapPercent}">
+                        <b>{{overlapPercent}}</b>
+                    </div>
+                    <div class="averageProgress progress" :class="{ bumpDown: tooSmallRed }" ref="red" v-if="averagePercent != '0%'" :style="{width: averagePercent}">
+                        <b>{{averagePercent}}</b>
+                    </div>
+                    <div class="currentProgress progress" :class="{ bumpDown: tooSmallGreen }" ref="green" v-if="currentPercent != '0%'" :style="{width: currentPercent}">
+                        <b>{{currentPercent}}</b>
+                    </div>
+                    <div class="progressleft progress" :class="{ bumpUp: tooSmallGray }" ref="gray" v-if="leftPercent != '0%'" :style="{width: leftPercent}">
+                        <b>{{leftPercent}}</b>
+                    </div>
+                </div>
+                <div class="btnDiv" v-if="!edit">
+                    <button class="incrementbtn up" v-on:click="incrementActionsCompleted(true)"><b>+{{incrementUp}}</b></button>
+                    <br>
+                    <button class="incrementbtn down" v-on:click="incrementActionsCompleted(false)"><b>-{{incrementDown}}</b></button>
+                </div>
+                <div class="btnDiv" v-if="edit">
+                    <div class="incrementbtn up">
+                        <b>+</b><input type="number" min="1" v-model="newIncrementUp" oninput="validity.valid||(value='');" />
+                    </div>
+                    <div class="incrementbtn down">
+                        <b>- </b><input type="number" min="1" v-model="newIncrementDown" oninput="validity.valid||(value='');" />
+                    </div>
+                </div>
+            </div>
+            <hr />
+        </div>
+    </script>
+
+    <!-- development version, includes helpful console warnings -->
+    <!--<script src="./vueDev.js"></script>-->
+    <!-- production version, optimized for size and speed -->
+    <script src="./vueProd.js"></script>
+
+    <script src="./main.js"></script>
+</body>
+</html>

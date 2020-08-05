@@ -1,0 +1,218 @@
+﻿body {
+    font-family: Arial;
+}
+
+body.dark {
+    background-color: black;
+    color: white;
+}
+
+.margin {
+    margin: 10px 0;
+}
+
+.margin-bottom {
+    margin-bottom: 10px;
+}
+
+.btn {
+    height: 30px;
+}
+
+button {
+    border-radius: 4px;
+    background-color: inherit;
+    color: inherit;
+    border-style: solid;
+}
+
+    button:hover {
+        background-color: gray;
+        color: white;
+    }
+
+.float-right {
+    float: right;
+}
+
+.warning {
+    color: red;
+}
+
+.completed {
+    color: dodgerblue;
+}
+
+.behind {
+    color: red;
+}
+
+.ahead {
+    color: green;
+}
+
+.goal {
+    color: goldenrod;
+}
+
+.bar-name, .completed-behind-ahead-goal, .per-day {
+    float: left;
+    width: 40%;
+    margin: 0;
+    min-height: 1px;
+    position: relative;
+}
+
+.per-day {
+    margin-left: 40%;
+}
+
+.column-40 {
+    float: left;
+    width: 40%;
+    margin: 5px;
+}
+
+/* Clear floats after the columns */
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.editBtn {
+    height: 20px;
+    margin-bottom: 5px;
+    float: right;
+}
+
+.btnDiv {
+    display: inline-block;
+    width: 5%;
+    min-width: 40px;
+}
+
+div.incrementbtn {
+    padding-top: 4px;
+    height: 26px;
+}
+
+.incrementbtn {
+    height: 30px;
+    overflow: hidden;
+    vertical-align: top;
+    border-width: 1px;
+    width: 100%;
+    color: black;
+}
+
+.up {
+    border-radius: 5px 5px 0 0;
+    background-color: lightgreen;
+}
+
+    .up:hover {
+        background-color: green;
+    }
+
+.down {
+    border-radius: 0 0 5px 5px;
+    background-color: #ff8a8a;
+}
+
+    .down:hover {
+        background-color: red;
+    }
+
+.progressBar {
+    display: inline-block;
+    width: 88%;
+    height: 30px;
+    color: white;
+    text-align: center;
+    line-height: 30px;
+}
+
+.progress {
+    float: left;
+}
+
+    .progress:first-child:last-child {
+        border-radius: 10px;
+    }
+
+    .progress:last-child {
+        border-radius: 0 10px 10px 0;
+    }
+
+    .progress:first-child {
+        border-radius: 10px 0 0 10px;
+    }
+
+.progress b {
+    z-index: 10;
+    position: relative;
+}
+
+.overlapProgress {
+    background-color: dodgerblue;
+}
+
+.averageProgress {
+    background-color: red;
+}
+
+.currentProgress {
+    background-color: green;
+}
+
+.progressleft {
+    background-color: gray;
+}
+
+.bumpUp b {
+    bottom: 27px;
+}
+
+.bumpDown b {
+    top: 27px;
+}
+
+input {
+    color: inherit;
+    background-color: inherit;
+    border-radius: 4px;
+    width: 90%;
+}
+    
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+    }
+
+    input[type=number] {
+    -moz-appearance: textfield;
+    }
+
+.incrementbtn input {
+    width: 20px;
+}
+
+input.completed, input.goal {
+    width: 30px;
+}
+
+.number-float {
+    position: absolute;
+    display: inline;
+    bottom: 0px;
+    left: 0px;
+    transition: bottom 0s, opacity 0s;
+}
+
+    .number-float.hidden {
+        opacity: 0;
+        bottom: 30px;
+        transition: bottom 2s, opacity 2s;
+    }
