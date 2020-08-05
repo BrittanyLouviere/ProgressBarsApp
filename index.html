@@ -18,8 +18,8 @@
 <body>
     <div id="app">
         <h1>My Progress</h1>
-        <button class="btn" v-on:click="addNewBar">+ New Progress Bar</button>
-        <button class="btn float-right" v-on:click="toggleDarkMode">Dark Mode</button>
+        <button class="btn" @click="addNewBar">+ New Progress Bar</button>
+        <button class="btn float-right" @click="toggleDarkMode">Dark Mode</button>
         <hr />
         <bar v-for="bar in bars"
             :key="bars.indexOf(bar)"
@@ -27,7 +27,7 @@
             :name="bar.name"
             :start-date="bar.startDate"
             :end-date="bar.endDate"
-            :number-of-actions="bar.numberOfActions"
+            :goal-actions="bar.goalActions"
             :actions-completed="bar.actionsCompleted"
             :increment-up="bar.incrementUp"
             :increment-down="bar.incrementDown"
@@ -49,7 +49,7 @@
                     <b class="behind" v-if="behind">{{actionsAheadBehind}}</b>
                     <b class="ahead" v-else>{{actionsAheadBehind}}</b>
                     <b>/</b>
-                    <b class="goal">{{numberOfActions}}</b>
+                    <b class="goal">{{goalActions}}</b>
                     <p class="number-float" :class="{ hidden: numberFloatHidden }">{{numberFloat}}</p>
                 </div>
                 <div class="completed-behind-ahead-goal" v-if="edit">
@@ -58,13 +58,14 @@
                     <b class="behind" v-if="behind">{{actionsAheadBehind}}</b>
                     <b class="ahead" v-else>{{actionsAheadBehind}}</b>
                     <b>/</b>
-                    <input class="goal" placeholder="Goal" type="number" min="1" v-model="newNumberOfActions" oninput="validity.valid||(value='');" />
+                    <input class="goal" placeholder="Goal" type="number" min="1" v-model="newGoalActions" oninput="validity.valid||(value='');" />
                 </div>
-                <button class="editBtn" v-on:click="toggleEdit">Edit</button>
+                <button class="editBtn" @click="toggleEdit">Edit</button>
                 <br>
                 <p class="per-day" v-if="actionsPerDay >= 1">Avg / day: {{actionsPerDay}}</p>
                 <p class="per-day" v-else>Days per: {{daysPerAction}}</p>
             </div>
+
             <div class="row" v-if="edit">
                 <div class="column-40">
                     <p><b>Start Date</b></p>
@@ -79,15 +80,15 @@
 
                     <p class="warning" v-if="verify">Are you sure you want to delete this bar?</p>
                     <br>
-                    <button class="warning margin-bottom" v-if="verify" v-on:click="remove">Delete</button>
-                    <button class="margin-bottom" v-if="verify" v-on:click="toggleVerify">Cancel</button>
-                    <button class="warning margin" v-else v-on:click="toggleVerify">Delete Progress Bar</button>
+                    <button class="warning margin-bottom" v-if="verify" @click="remove">Delete</button>
+                    <button class="margin-bottom" v-if="verify" @click="toggleVerify">Cancel</button>
+                    <button class="warning margin" v-else @click="toggleVerify">Delete Progress Bar</button>
                     
                     <br>
                     <p class="warning" v-if="dateDiff < 1">Input start and end date (start date must be before end date)</p>
-                    <p class="warning" v-if="numberOfActions < 1">Input number of actions to complete (must be more than 0)</p>
+                    <p class="warning" v-if="goalActions < 1">Input number of actions to complete (must be more than 0)</p>
                     <p class="warning" v-if="incrementUp < 1 || incrementDown < 1">Input number to increment by (must be more than 0)</p>
-                    <button v-on:click="update">Update Progress Bar</button>
+                    <button class="margin-bottom" @click="update">Update Progress Bar</button>
                 </div>
             </div>
             <div class="row">
@@ -106,9 +107,9 @@
                     </div>
                 </div>
                 <div class="btnDiv" v-if="!edit">
-                    <button class="incrementbtn up" v-on:click="incrementActionsCompleted(true)"><b>+{{incrementUp}}</b></button>
+                    <button class="incrementbtn up" @click="incrementActionsCompleted(true)"><b>+{{incrementUp}}</b></button>
                     <br>
-                    <button class="incrementbtn down" v-on:click="incrementActionsCompleted(false)"><b>-{{incrementDown}}</b></button>
+                    <button class="incrementbtn down" @click="incrementActionsCompleted(false)"><b>-{{incrementDown}}</b></button>
                 </div>
                 <div class="btnDiv" v-if="edit">
                     <div class="incrementbtn up">

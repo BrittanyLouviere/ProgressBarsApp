@@ -15,7 +15,7 @@
             newName: '',
             newStartDate: '',
             newEndDate: '',
-            newNumberOfActions: 1,
+            newGoalActions: 1,
             newActionsCompleted: 0,
             newIncrementUp: 1,
             newIncrementDown: 1
@@ -26,7 +26,7 @@
         name: String,
         startDate: String,
         endDate: String,
-        numberOfActions: Number,
+        goalActions: Number,
         actionsCompleted: Number,
         incrementUp: Number,
         incrementDown: Number
@@ -38,7 +38,7 @@
         this.newName = this.name
         this.newStartDate = this.startDate
         this.newEndDate = this.endDate
-        this.newNumberOfActions = this.numberOfActions
+        this.newGoalActions = this.goalActions
         this.newActionsCompleted = this.actionsCompleted
         this.newIncrementUp = this.incrementUp
         this.newIncrementDown = this.incrementDown
@@ -53,16 +53,16 @@
         },
 
         actionsAheadBehind() {
-            var avg = (this.averageNum / 100) * this.numberOfActions
+            var avg = (this.averageNum / 100) * this.goalActions
             return Math.ceil(Math.abs(this.actionsCompleted - avg))
         },
         behind() {
-            var avg = (this.averageNum / 100) * this.numberOfActions
+            var avg = (this.averageNum / 100) * this.goalActions
             return avg > this.actionsCompleted
         },
 
         actionsPerDay() {
-            var avg = (this.numberOfActions / this.dateDiff).toFixed(2)
+            var avg = (this.goalActions / this.dateDiff).toFixed(2)
             return isNaN(avg) || avg === 'Infinity' || avg === '-Infinity' ? 0 : avg
         },
 
@@ -92,7 +92,7 @@
         },
 
         currentNum() {
-            var curNum = Math.round((this.actionsCompleted / this.numberOfActions) * 100)
+            var curNum = Math.round((this.actionsCompleted / this.goalActions) * 100)
             return isNaN(curNum) || curNum < 0 ? 0 : curNum > 100 ? 100 : curNum
         },
         currentPercent() {
@@ -130,7 +130,7 @@
             this.newName = this.name
             this.newStartDate = this.startDate
             this.newEndDate = this.endDate
-            this.newNumberOfActions = this.numberOfActions
+            this.newGoalActions = this.goalActions
             this.newActionsCompleted = this.actionsCompleted
             this.newIncrementUp = this.incrementUp
             this.newIncrementDown = this.incrementDown
@@ -155,7 +155,7 @@
                 this.newName, 
                 this.newStartDate, 
                 this.newEndDate, 
-                this.newNumberOfActions, 
+                this.newGoalActions, 
                 this.newActionsCompleted, 
                 this.newIncrementUp, 
                 this.newIncrementDown
@@ -191,11 +191,11 @@ var app = new Vue({
     methods: {
         addNewBar() {
             //add new bar with index 0
-            this.bars.unshift({
+            this.bars.push({
                 name: '',
                 startDate: '',
                 endDate: '',
-                numberOfActions: 1,
+                goalActions: 1,
                 actionsCompleted: 0,
                 incrementUp: 1,
                 incrementDown: 1
@@ -217,7 +217,7 @@ var app = new Vue({
             this.bars[index].name = newName
             this.bars[index].startDate = newStartDate
             this.bars[index].endDate = newEndDate
-            this.bars[index].numberOfActions = Number(newNumberOfActions)
+            this.bars[index].goalActions = Number(newGoalActions)
             this.bars[index].actionsCompleted = Number(newActionsCompleted)
             this.bars[index].incrementUp = Number(newIncrementUp)
             this.bars[index].incrementDown = Number(newIncrementDown)
@@ -240,6 +240,9 @@ var app = new Vue({
                     element.incrementUp = 1
                 if (element.incrementDown === undefined)
                     element.incrementDown = 1
+                
+                if (element.goalActions === undefined)
+                    element.goalActions = element.numberOfActions
             }
         }
         this.setDarkMode()
