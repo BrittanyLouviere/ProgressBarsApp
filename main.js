@@ -1,4 +1,81 @@
-﻿Vue.component('bar', {
+﻿Vue.component('milestone', {
+    template: '#milestone-template',
+    data() {
+        return {
+            editMilestoneModal: false,
+            deleteMilestoneModal: false,
+            newName: this.name,
+            newActions: this.actions
+        }
+    },
+    props: {
+        name: String,
+        actions: Number
+    },
+    computed: {
+        percent() {
+            var a = this.$parent.goalActions
+            var b = this.actions / a
+            return b
+        },
+        percentRounded() {
+            return Math.round(this.percent * 100)
+        },
+        date() {
+            var startdate = Date.parse(this.$parent.startDate)
+            var enddate = Date.parse(this.$parent.endDate)
+            var diff = enddate - startdate
+            var date = new Date(startdate + (diff * this.percent))
+
+            return date.toString().substr(4, 11)
+        },
+        styleObject() {
+            return {
+                'margin-left': Math.round(this.percentRounded) + '%'
+            }
+        }
+    },
+    methods: {
+        openEditModal() {
+            this.newName = this.name
+            this.newActions = this.actions
+            this.editMilestoneModal = true
+        },
+        closeEditModal(event) {
+            if (event.target == this.$refs.editMilestoneModal || event.target == this.$refs.closeEditModal)
+                this.editMilestoneModal = false
+        },
+        save() {
+            var newMilestone = {
+                name: this.newName,
+                actions: parseInt(this.newActions)
+            }
+            this.$emit(
+                "update-milestone",
+                newMilestone
+            )
+            this.editMilestoneModal = false
+        },
+        openDeleteModal() {
+            this.deleteMilestoneModal = true
+        },
+        closeDeleteModal(event) {
+            if (event.target == this.$refs.deleteMilestoneModal 
+                || event.target == this.$refs.closeDeleteModal
+                || event.target == this.$refs.cancelDelete)
+                this.deleteMilestoneModal = false
+        },
+        deleteMilestone() {
+            this.$emit(
+                "delete-milestone"
+            )
+            this.editMilestoneModal = false
+            this.deleteMilestoneModal = false
+        }
+    }
+})
+
+Vue.component('bar', {
     template: '#bar-template',
     data() {
         return {
@@ -10,6 +87,7 @@
             tooSmallRed: false,
             tooSmallGreen: false,
             tooSmallGray: false,
+            newMilestoneModal: false,
 
             newIndex: 0,
             newName: '',
@@ -18,7 +96,11 @@
             newGoalActions: 1,
             newActionsCompleted: 0,
             newIncrementUp: 1,
-            newIncrementDown: 1
+            newIncrementDown: 1,
+
+            newMilestones: new Array(),
+            newMilestoneName: "",
+            newMilestoneActions: 0
         }
     },
     props: {
@@ -29,7 +111,8 @@
         goalActions: Number,
         actionsCompleted: Number,
         incrementUp: Number,
-        incrementDown: Number
+        incrementDown: Number,
+        milestones: Array
     },
     mounted() {
         this.updateTooSmallValues()
@@ -42,6 +125,7 @@
         this.newActionsCompleted = this.actionsCompleted
         this.newIncrementUp = this.incrementUp
         this.newIncrementDown = this.incrementDown
+        this.newMilestones = this.milestones
     },
     computed: {
         dateDiff() {
@@ -158,7 +242,8 @@
                 this.newGoalActions, 
                 this.newActionsCompleted, 
                 this.newIncrementUp, 
-                this.newIncrementDown
+                this.newIncrementDown,
+                this.newMilestones
             )
             this.updateTooSmallValues()
         },
@@ -178,6 +263,34 @@
                 this.tooSmallGray = this.$refs.gray.clientWidth < 30
             else
                 this.tooSmallGray = true
+        },
+        openMilestoneModal() {
+            this.newMilestoneModal = true
+        },
+        closeMilestoneModal(event) {
+            if (event.target == this.$refs.newMilestoneModal || event.target == this.$refs.closeModal)
+                this.newMilestoneModal = false
+        },
+        addMilestone() {
+            this.newMilestones.push({ 
+                name: this.newMilestoneName,
+                actions: parseInt(this.newMilestoneActions) 
+            })
+            this.update()
+            this.newMilestoneModal = false
+            this.newMilestoneName = ""
+            this.newMilestoneActions = 0
+        },
+        updateMilestone(milestone, newMilestone) {
+            var x = this.newMilestones[this.newMilestones.indexOf(milestone)]
+            x.name = newMilestone.name
+            x.actions = newMilestone.actions
+            this.update()
+        },
+        deleteMilestone(milestone) {
+            var index = this.newMilestones.indexOf(milestone)
+            this.newMilestones.splice(index, 1)
+            this.update()
         }
     }
 })
@@ -198,7 +311,8 @@ var app = new Vue({
                 goalActions: 1,
                 actionsCompleted: 0,
                 incrementUp: 1,
-                incrementDown: 1
+                incrementDown: 1,
+                milestones: new Array()
             })
 
         },
@@ -212,7 +326,7 @@ var app = new Vue({
         removeBar(index) {
             this.bars.splice(index, 1)
         },
-        updateBar(index, newIndex, newName, newStartDate, newEndDate, newNumberOfActions, newActionsCompleted, newIncrementUp, newIncrementDown) {
+        updateBar(index, newIndex, newName, newStartDate, newEndDate, newGoalActions, newActionsCompleted, newIncrementUp, newIncrementDown, newMilestones) {
             //update values
             this.bars[index].name = newName
             this.bars[index].startDate = newStartDate
@@ -221,6 +335,7 @@ var app = new Vue({
             this.bars[index].actionsCompleted = Number(newActionsCompleted)
             this.bars[index].incrementUp = Number(newIncrementUp)
             this.bars[index].incrementDown = Number(newIncrementDown)
+            this.bars[index].milestones = newMilestones
 
             //move bar to new location
             var bar = this.bars[index]
@@ -243,6 +358,9 @@ var app = new Vue({
                 
                 if (element.goalActions === undefined)
                     element.goalActions = element.numberOfActions
+
+                if (element.milestones === undefined)
+                    element.milestones = new Array()
             }
         }
         this.setDarkMode()

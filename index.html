@@ -31,6 +31,7 @@
             :actions-completed="bar.actionsCompleted"
             :increment-up="bar.incrementUp"
             :increment-down="bar.incrementDown"
+            :milestones="bar.milestones"
             @remove-bar="removeBar"
             @update-bar="updateBar">
         </bar>
@@ -38,6 +39,22 @@
 
     <script type="text/x-template" id="bar-template">
         <div>
+            <div class="modal" ref="newMilestoneModal" :class="{ show: newMilestoneModal }" @click="closeMilestoneModal($event)">
+                <div class="modal-content">
+                    <span class="close" ref="closeModal" @click="closeMilestoneModal($event)">&times;</span>
+                    <p>Make a new Milestone!</p>
+                    
+                    <label for="Name">Name: </label>
+                    <input type="text" v-model="newMilestoneName">
+                    <br>
+                    <label for="Actions">Actions: </label>
+                    <input type="number" v-model="newMilestoneActions">
+                    <br>
+                    <button class="danger hidden"></button>
+                    <button @click="addMilestone">Add Milestone</button>
+                </div>
+            </div>
+
             <div class="row">
                 <p class="bar-name" v-if="!edit"><b>{{name}}</b></p>
                 <div class="bar-name" v-if="edit">
@@ -78,21 +95,31 @@
                     <p><b>Display Order</b></p>
                     <input type="number" min="0" v-model="newIndex" oninput="validity.valid||(value='');" />
 
-                    <p class="warning" v-if="verify">Are you sure you want to delete this bar?</p>
+                    <p v-if="verify">Are you sure you want to delete this bar?</p>
                     <br>
-                    <button class="warning margin-bottom" v-if="verify" @click="remove">Delete</button>
+                    <button class="danger margin-bottom" v-if="verify" @click="remove">Delete</button>
                     <button class="margin-bottom" v-if="verify" @click="toggleVerify">Cancel</button>
-                    <button class="warning margin" v-else @click="toggleVerify">Delete Progress Bar</button>
+                    <button class="danger margin" v-else @click="toggleVerify">Delete Progress Bar</button>
                     
                     <br>
-                    <p class="warning" v-if="dateDiff < 1">Input start and end date (start date must be before end date)</p>
-                    <p class="warning" v-if="goalActions < 1">Input number of actions to complete (must be more than 0)</p>
-                    <p class="warning" v-if="incrementUp < 1 || incrementDown < 1">Input number to increment by (must be more than 0)</p>
+                    <p class="danger" v-if="dateDiff < 1">Input start and end date (start date must be before end date)</p>
+                    <p class="danger" v-if="goalActions < 1">Input number of actions to complete (must be more than 0)</p>
+                    <p class="danger" v-if="incrementUp < 1 || incrementDown < 1">Input number to increment by (must be more than 0)</p>
                     <button class="margin-bottom" @click="update">Update Progress Bar</button>
+
+                    <button @click="openMilestoneModal">New Milestone</button>
                 </div>
             </div>
+
             <div class="row">
-                <div class="progressBar">
+                <div class="progressBar" ref="progressBar">
+                    <milestone v-for="(milestone, index) in milestones"
+                        :key="index"
+                        :actions="milestone.actions"
+                        :name="milestone.name"
+                        @update-milestone="updateMilestone(milestone, $event)"
+                        @delete-milestone="deleteMilestone(milestone)">
+                    </milestone>
                     <div class="overlapProgress progress" :class="{ bumpUp: tooSmallBlue }" ref="blue" v-if="overlapPercent != '0%'" :style="{width: overlapPercent}">
                         <b>{{overlapPercent}}</b>
                     </div>
@@ -121,6 +148,42 @@
                 </div>
             </div>
             <hr />
+        </div>
+    </script>
+
+    <script type="text/x-template" id="milestone-template">
+        <div class="milestone tooltip" :style="styleObject">
+            <span class="tooltiptext">
+                <p @click="openEditModal"><b>{{name}}</b></p>
+                <p @click="openEditModal">{{actions}}</p>
+                <p @click="openEditModal">{{percentRounded}}%</p>
+                <p @click="openEditModal">{{date}}</p>
+            </span>
+
+            <div class="modal" ref="editMilestoneModal" :class="{ show: editMilestoneModal }" @click="closeEditModal($event)">
+                <div class="modal-content">
+                    <span class="close" ref="closeEditModal" @click="closeEditModal($event)">&times;</span>
+                    <h3>Edit this Milestone!</h3>
+                    
+                    <label for="Name">Name: </label>
+                    <input type="text" v-model="newName">
+                    <br>
+                    <label for="Actions">Actions: </label>
+                    <input type="number" min="0" v-model="newActions">
+                    <br>
+                    <button class="danger" @click="openDeleteModal">Delete</button>
+                    <button @click="save">Save Milestone</button>
+                </div>
+            </div>
+
+            <div class="modal" ref="deleteMilestoneModal" :class="{ show: deleteMilestoneModal }" @click="closeDeleteModal($event)">
+                <div class="modal-content">
+                    <span class="close" ref="closeDeleteModal" @click="closeDeleteModal($event)">&times;</span>
+                    <p>Are you sure you want to delete this milestone?</p>
+                    <button class="danger" @click="deleteMilestone">Delete</button>
+                    <button ref="cancelDelete" @click="closeDeleteModal($event)">Canacel</button>
+                </div>
+            </div>
         </div>
     </script>
 
