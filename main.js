@@ -14,18 +14,18 @@
     },
     computed: {
         percent() {
-            var a = this.$parent.goalActions
-            var b = this.actions / a
+            let a = this.$parent.goalActions
+            let b = this.actions / a
             return b
         },
         percentRounded() {
             return Math.round(this.percent * 100)
         },
         date() {
-            var startdate = Date.parse(this.$parent.startDate)
-            var enddate = Date.parse(this.$parent.endDate)
-            var diff = enddate - startdate
-            var date = new Date(startdate + (diff * this.percent))
+            let startdate = Date.parse(this.$parent.startDate)
+            let enddate = Date.parse(this.$parent.endDate)
+            let diff = enddate - startdate
+            let date = new Date(startdate + (diff * this.percent))
 
             return date.toString().substr(4, 11)
         },
@@ -46,7 +46,7 @@
                 this.editMilestoneModal = false
         },
         save() {
-            var newMilestone = {
+            let newMilestone = {
                 name: this.newName,
                 actions: parseInt(this.newActions)
             }
@@ -129,24 +129,24 @@ Vue.component('bar', {
     },
     computed: {
         dateDiff() {
-            var startYMD = new Date(this.startDate + 'Z')
-            var endYMD = new Date(this.endDate + 'Z')
+            let startYMD = new Date(this.startDate + 'Z')
+            let endYMD = new Date(this.endDate + 'Z')
 
-            var diff = (endYMD - startYMD) / (1000 * 60 * 60 * 24)
+            let diff = (endYMD - startYMD) / (1000 * 60 * 60 * 24)
             return isNaN(diff) || diff < 0 ? 0 : diff
         },
 
         actionsAheadBehind() {
-            var avg = (this.averageNum / 100) * this.goalActions
+            let avg = (this.averageNum / 100) * this.goalActions
             return Math.ceil(Math.abs(this.actionsCompleted - avg))
         },
         behind() {
-            var avg = (this.averageNum / 100) * this.goalActions
+            let avg = (this.averageNum / 100) * this.goalActions
             return avg > this.actionsCompleted
         },
 
         actionsPerDay() {
-            var avg = (this.goalActions / this.dateDiff).toFixed(2)
+            let avg = (this.goalActions / this.dateDiff).toFixed(2)
             return isNaN(avg) || avg === 'Infinity' || avg === '-Infinity' ? 0 : avg
         },
 
@@ -156,7 +156,7 @@ Vue.component('bar', {
         },
 
         overlapNum() {
-            var overlap = Math.min(this.averageNum, this.currentNum)
+            let overlap = Math.min(this.averageNum, this.currentNum)
             return overlap
         },
         overlapPercent() {
@@ -164,11 +164,11 @@ Vue.component('bar', {
         },
 
         averageNum() {
-            var today = new Date();
-            var startTodayDiff = Math.ceil((today - new Date(this.startDate + 'Z')) / (1000 * 60 * 60 * 24))
-            var startEndDiff = Math.ceil(this.dateDiff)
+            let today = new Date();
+            let startTodayDiff = Math.ceil((today - new Date(this.startDate + 'Z')) / (1000 * 60 * 60 * 24))
+            let startEndDiff = Math.ceil(this.dateDiff)
 
-            var avgNum = Math.round((startTodayDiff / startEndDiff) * 100)
+            let avgNum = Math.round((startTodayDiff / startEndDiff) * 100)
             return isNaN(avgNum) || avgNum < 0 ? 0 : avgNum > 100 ? 100 : avgNum
         },
         averagePercent() {
@@ -176,7 +176,7 @@ Vue.component('bar', {
         },
 
         currentNum() {
-            var curNum = Math.round((this.actionsCompleted / this.goalActions) * 100)
+            let curNum = Math.round((this.actionsCompleted / this.goalActions) * 100)
             return isNaN(curNum) || curNum < 0 ? 0 : curNum > 100 ? 100 : curNum
         },
         currentPercent() {
@@ -184,7 +184,7 @@ Vue.component('bar', {
         },
 
         leftPercent() {
-            var left = 100 - Math.max(this.averageNum, this.currentNum)
+            let left = 100 - Math.max(this.averageNum, this.currentNum)
             return left + '%'
         }
     },
@@ -228,22 +228,24 @@ Vue.component('bar', {
         },
         remove() {
             this.setEdit(false)
-            this.$emit("remove-bar", this.index)
+            this.$emit("remove-bar")
         },
         update() {
             this.setEdit(false)
+            let newBar = {
+                index: this.newIndex, 
+                name: this.newName, 
+                startDate: this.newStartDate, 
+                endDate: this.newEndDate, 
+                goalActions: this.newGoalActions, 
+                actionsCompleted: this.newActionsCompleted, 
+                incrementUp: this.newIncrementUp, 
+                incrementDown: this.newIncrementDown,
+                milestones: this.newMilestones
+            }
             this.$emit(
                 "update-bar", 
-                this.index, 
-                this.newIndex, 
-                this.newName, 
-                this.newStartDate, 
-                this.newEndDate, 
-                this.newGoalActions, 
-                this.newActionsCompleted, 
-                this.newIncrementUp, 
-                this.newIncrementDown,
-                this.newMilestones
+                newBar
             )
             this.updateTooSmallValues()
         },
@@ -282,20 +284,19 @@ Vue.component('bar', {
             this.newMilestoneActions = 0
         },
         updateMilestone(milestone, newMilestone) {
-            var x = this.newMilestones[this.newMilestones.indexOf(milestone)]
-            x.name = newMilestone.name
-            x.actions = newMilestone.actions
+            milestone.name = newMilestone.name
+            milestone.actions = newMilestone.actions
             this.update()
         },
         deleteMilestone(milestone) {
-            var index = this.newMilestones.indexOf(milestone)
+            let index = this.newMilestones.indexOf(milestone)
             this.newMilestones.splice(index, 1)
             this.update()
         }
     }
 })
 
-var app = new Vue({
+let app = new Vue({
     el: '#app',
     data: {
         bars: [],
@@ -323,24 +324,28 @@ var app = new Vue({
         setDarkMode(){
             document.getElementsByTagName("BODY")[0].classList.toggle("dark", this.darkMode)
         },
-        removeBar(index) {
+        removeBar(bar) {
+            let index = this.bars.indexOf(bar)
             this.bars.splice(index, 1)
         },
-        updateBar(index, newIndex, newName, newStartDate, newEndDate, newGoalActions, newActionsCompleted, newIncrementUp, newIncrementDown, newMilestones) {
+        updateBar(bar, newBar) {
+            let index = this.bars.indexOf(bar)
+
             //update values
-            this.bars[index].name = newName
-            this.bars[index].startDate = newStartDate
-            this.bars[index].endDate = newEndDate
-            this.bars[index].goalActions = Number(newGoalActions)
-            this.bars[index].actionsCompleted = Number(newActionsCompleted)
-            this.bars[index].incrementUp = Number(newIncrementUp)
-            this.bars[index].incrementDown = Number(newIncrementDown)
-            this.bars[index].milestones = newMilestones
+            bar.name = newBar.name
+            bar.startDate = newBar.startDate
+            bar.endDate = newBar.endDate
+            bar.goalActions = Number(newBar.goalActions)
+            bar.actionsCompleted = Number(newBar.actionsCompleted)
+            bar.incrementUp = Number(newBar.incrementUp)
+            bar.incrementDown = Number(newBar.incrementDown)
+            bar.milestones = newBar.milestones
 
             //move bar to new location
-            var bar = this.bars[index]
-            this.bars.splice(index, 1)
-            this.bars.splice(newIndex, 0, bar)
+            if (index != newBar.index) {
+                this.bars.splice(index, 1)
+                this.bars.splice(newBar.index, 0, bar)
+            }
         }
     },
     mounted() {
