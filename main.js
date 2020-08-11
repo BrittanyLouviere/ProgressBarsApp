@@ -98,7 +98,7 @@ Vue.component('bar', {
             newIncrementUp: 1,
             newIncrementDown: 1,
 
-            newMilestones: new Array(),
+            newMilestoneList: new Array(),
             newMilestoneName: "",
             newMilestoneActions: 0
         }
@@ -112,7 +112,7 @@ Vue.component('bar', {
         actionsCompleted: Number,
         incrementUp: Number,
         incrementDown: Number,
-        milestones: Array
+        milestoneList: Array
     },
     mounted() {
         this.updateTooSmallValues()
@@ -125,7 +125,7 @@ Vue.component('bar', {
         this.newActionsCompleted = this.actionsCompleted
         this.newIncrementUp = this.incrementUp
         this.newIncrementDown = this.incrementDown
-        this.newMilestones = this.milestones
+        this.newMilestoneList = this.milestoneList
     },
     computed: {
         dateDiff() {
@@ -241,7 +241,7 @@ Vue.component('bar', {
                 actionsCompleted: this.newActionsCompleted, 
                 incrementUp: this.newIncrementUp, 
                 incrementDown: this.newIncrementDown,
-                milestones: this.newMilestones
+                milestoneList: this.newMilestoneList
             }
             this.$emit(
                 "update-bar", 
@@ -274,7 +274,7 @@ Vue.component('bar', {
                 this.newMilestoneModal = false
         },
         addMilestone() {
-            this.newMilestones.push({ 
+            this.newMilestoneList.push({ 
                 name: this.newMilestoneName,
                 actions: parseInt(this.newMilestoneActions) 
             })
@@ -289,8 +289,8 @@ Vue.component('bar', {
             this.update()
         },
         deleteMilestone(milestone) {
-            let index = this.newMilestones.indexOf(milestone)
-            this.newMilestones.splice(index, 1)
+            let index = this.newMilestoneList.indexOf(milestone)
+            this.newMilestoneList.splice(index, 1)
             this.update()
         }
     }
@@ -299,13 +299,13 @@ Vue.component('bar', {
 let app = new Vue({
     el: '#app',
     data: {
-        bars: [],
+        barList: [],
         darkMode: false
     },
     methods: {
         addNewBar() {
             //add new bar with index 0
-            this.bars.push({
+            this.barList.push({
                 name: '',
                 startDate: '',
                 endDate: '',
@@ -313,7 +313,7 @@ let app = new Vue({
                 actionsCompleted: 0,
                 incrementUp: 1,
                 incrementDown: 1,
-                milestones: new Array()
+                milestoneList: new Array()
             })
 
         },
@@ -325,11 +325,11 @@ let app = new Vue({
             document.getElementsByTagName("BODY")[0].classList.toggle("dark", this.darkMode)
         },
         removeBar(bar) {
-            let index = this.bars.indexOf(bar)
-            this.bars.splice(index, 1)
+            let index = this.barList.indexOf(bar)
+            this.barList.splice(index, 1)
         },
         updateBar(bar, newBar) {
-            let index = this.bars.indexOf(bar)
+            let index = this.barList.indexOf(bar)
 
             //update values
             bar.name = newBar.name
@@ -339,17 +339,17 @@ let app = new Vue({
             bar.actionsCompleted = Number(newBar.actionsCompleted)
             bar.incrementUp = Number(newBar.incrementUp)
             bar.incrementDown = Number(newBar.incrementDown)
-            bar.milestones = newBar.milestones
+            bar.milestoneList = newBar.milestoneList
 
             //move bar to new location
             if (index != newBar.index) {
-                this.bars.splice(index, 1)
-                this.bars.splice(newBar.index, 0, bar)
+                this.barList.splice(index, 1)
+                this.barList.splice(newBar.index, 0, bar)
             }
         }
     },
     mounted() {
-        if (localStorage.bars) {
+        if (localStorage.bars !== undefined) {
             this.bars = JSON.parse(localStorage.bars)
             if (localStorage.darkMode !== 'undefined')
                 this.darkMode = (localStorage.darkMode == "true")
@@ -364,15 +364,24 @@ let app = new Vue({
                 if (element.goalActions === undefined)
                     element.goalActions = element.numberOfActions
 
-                if (element.milestones === undefined)
-                    element.milestones = new Array()
+                if (element.milestoneList === undefined){
+                    if (element.milestones === undefined)
+                        element.milestoneList = new Array()
+                    else
+                        element.milestoneList = element.milestones
+                }
             }
+
+            localStorage.barList = localStorage.bars
+        }
+        if (localStorage.barList) {
+            this.barList = JSON.parse(localStorage.barList)
         }
         this.setDarkMode()
     },
     watch: {
-        bars(newBars) {
-            localStorage.bars = JSON.stringify(newBars)
+        barList(newBarList) {
+            localStorage.barList = JSON.stringify(newBarList)
         },
         darkMode(newDarkMode) {
             localStorage.darkMode = newDarkMode

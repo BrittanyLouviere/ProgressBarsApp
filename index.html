@@ -21,7 +21,7 @@
         <button class="btn" @click="addNewBar">+ New Progress Bar</button>
         <button class="btn float-right" @click="toggleDarkMode">Dark Mode</button>
         <hr />
-        <bar v-for="(bar, index) in bars"
+        <bar v-for="(bar, index) in barList"
             :key="index"
             :index="index"
             :name="bar.name"
@@ -31,7 +31,7 @@
             :actions-completed="bar.actionsCompleted"
             :increment-up="bar.incrementUp"
             :increment-down="bar.incrementDown"
-            :milestones="bar.milestones"
+            :milestone-list="bar.milestoneList"
             @remove-bar="removeBar(bar)"
             @update-bar="updateBar(bar, $event)">
         </bar>
@@ -113,7 +113,7 @@
 
             <div class="row">
                 <div class="progressBar" ref="progressBar">
-                    <milestone v-for="(milestone, index) in milestones"
+                    <milestone v-for="(milestone, index) in milestoneList"
                         :key="index"
                         :actions="milestone.actions"
                         :name="milestone.name"
