@@ -316,10 +316,12 @@ let app = new Vue({
                 milestoneList: new Array()
             })
 
+            this.saveToLocalStorage()
         },
         toggleDarkMode(){
             this.darkMode = !this.darkMode
             this.setDarkMode()
+            localStorage.darkMode = this.darkMode
         },
         setDarkMode(){
             document.getElementsByTagName("BODY")[0].classList.toggle("dark", this.darkMode)
@@ -327,6 +329,8 @@ let app = new Vue({
         removeBar(bar) {
             let index = this.barList.indexOf(bar)
             this.barList.splice(index, 1)
+
+            this.saveToLocalStorage()
         },
         updateBar(bar, newBar) {
             let index = this.barList.indexOf(bar)
@@ -346,10 +350,15 @@ let app = new Vue({
                 this.barList.splice(index, 1)
                 this.barList.splice(newBar.index, 0, bar)
             }
+
+            this.saveToLocalStorage()
+        },
+        saveToLocalStorage() {
+            localStorage.barList = JSON.stringify(this.barList)
         }
     },
     mounted() {
-        if (localStorage.bars !== undefined) {
+        if (localStorage.barList === undefined) {
             this.bars = JSON.parse(localStorage.bars)
             if (localStorage.darkMode !== 'undefined')
                 this.darkMode = (localStorage.darkMode == "true")
@@ -376,15 +385,8 @@ let app = new Vue({
         }
         if (localStorage.barList) {
             this.barList = JSON.parse(localStorage.barList)
+            this.darkMode = (localStorage.darkMode == "true")
         }
         this.setDarkMode()
-    },
-    watch: {
-        barList(newBarList) {
-            localStorage.barList = JSON.stringify(newBarList)
-        },
-        darkMode(newDarkMode) {
-            localStorage.darkMode = newDarkMode
-        }
     }
 })
